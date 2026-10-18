@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Empty Road — Zen Drive • 450</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  *{font-family:'Space Grotesk',sans-serif}
+  .display{font-family:'Syne',sans-serif}
+  canvas{touch-action:none}
+  .glass{background:rgba(15,15,20,0.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  ::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body class="bg-[#050507] text-white overflow-hidden select-none">
+<header class="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-4 md:px-6 py-4">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-white text-black grid place-items-center font-black display text-[11px] leading-none">ER<br><span class="text-[7px] tracking-[0.2em] font-bold">ZEN</span></div>
+    <div>
+      <h1 class="display font-800 text-[15px] tracking-tight leading-none">EMPTY ROAD</h1>
+      <p class="text-[10px] tracking-[0.18em] text-white/50 font-semibold">450 KM/H • NITRO • CHASE CAM</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="hidden md:flex items-center gap-2 text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-cyan-300">● CAM TRACKING</div>
+    <button id="nitroBtnDesk" class="hidden md:flex items-center gap-2 px-5 h-9 rounded-full bg-gradient-to-r from-cyan-400 to-blue-600 border border-white/20 text-white text-xs font-black tracking-widest shadow-[0_8px_20px_rgba(0,150,255,0.4)] active:scale-95 transition">⚡ NITRO <span class="opacity-60 ml-1 hidden lg:inline">SHIFT</span></button>
+    <button id="pauseBtn" class="hidden md:flex items-center gap-2 px-4 h-9 rounded-full bg-white text-black text-xs font-bold tracking-wide">II PAUSE</button>
+    <button id="restartTop" class="w-9 h-9 md:hidden rounded-full bg-white text-black grid place-items-center">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="absolute top-[70px] inset-x-0 z-10 px-3 md:px-6 flex gap-2 md:gap-3 pointer-events-none">
+  <div class="flex-1 md:flex-none md:w-[180px] glass rounded-2xl border border-white/10 px-4 py-3 flex items-center justify-between">
+    <div>
+      <p class="text-[10px] tracking-[0.15em] text-white/40 font-bold">SPEED</p>
+      <p class="display font-800 text-2xl leading-none mt-1"><span id="speedEl">0</span> <span class="text-sm font-semibold text-white/60">km/h</span></p>
+    </div>
+    <div class="w-10 h-10 rounded-full border-[3px] border-cyan-400/40 grid place-items-center bg-cyan-500/10">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
+    </div>
+  </div>
+  <div class="flex-1 md:flex-none md:w-[180px] glass rounded-2xl border border-white/10 px-4 py-3">
+    <p class="text-[10px] tracking-[0.15em] text-white/40 font-bold">DISTANCE</p>
+    <p class="display font-800 text-2xl leading-none mt-1"><span id="distEl">0.00</span> <span class="text-sm font-semibold text-white/60">km</span></p>
+    <p class="text-[10px] text-emerald-400 font-bold mt-1 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> AVOID TRAFFIC</p>
+  </div>
+  <div class="hidden lg:flex flex-1 glass rounded-2xl border border-white/10 px-4 py-3 items-center gap-3">
+    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 grid place-items-center text-white shadow-lg">⚡</div>
+    <div class="flex-1">
+      <p class="text-[10px] tracking-[0.15em] text-white/40 font-bold flex items-center gap-2">NITRO <span id="nitroState" class="text-cyan-400">READY</span> <span class="ml-auto text-white/50">TOP 450</span></p>
+      <div class="w-full h-2 bg-black/40 rounded-full overflow-hidden mt-1 border border-white/10">
+        <div id="nitroFill" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-100" style="width:100%"></div>
+      </div>
+    </div>
+    <button id="changeCar" class="ml-2 px-4 h-8 rounded-full bg-white text-black text-xs font-bold pointer-events-auto">Color</button>
+  </div>
+</div>
+
+<div class="absolute top-[138px] inset-x-3 z-10 md:hidden pointer-events-none">
+  <div class="glass rounded-full border border-white/10 px-3 py-[7px] flex items-center gap-2.5">
+    <span class="text-[10px] tracking-[0.14em] font-black text-cyan-400 flex items-center gap-1"><span class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 grid place-items-center text-white text-[11px]">⚡</span> N2O</span>
+    <div class="flex-1 h-[8px] bg-black/60 rounded-full overflow-hidden border border-white/10 p-[1px]">
+      <div id="nitroFillMobile" class="h-full bg-gradient-to-r from-cyan-400 to-blue-600 rounded-full transition-all duration-100" style="width:100%"></div>
+    </div>
+    <span id="nitroPercent" class="text-[11px] font-black min-w-[36px] text-right">100%</span>
+  </div>
+</div>
+
+<div id="wrap" class="absolute inset-0">
+  <canvas id="c" class="w-full h-full block"></canvas>
+  <div id="nitroFx" class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200" style="background: radial-gradient(800px 500px at 50% 50%, transparent 55%, rgba(0,180,255,0.18) 100%);"></div>
+  <div id="speedLines" class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200 overflow-hidden">
+    <div class="absolute inset-0" style="background: repeating-linear-gradient(90deg, transparent 0 60px, rgba(0,200,255,0.09) 60px 61px); transform: skewX(-18deg);"></div>
+  </div>
+  <div id="nitroText" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 scale-90 transition-all duration-200">
+    <p class="display font-black text-5xl md:text-7xl tracking-tighter text-white" style="text-shadow: 0 0 30px rgba(0,180,255,0.9), 0 10px 30px rgba(0,0,0,0.6); -webkit-text-stroke: 1px rgba(255,255,255,0.9)">NITRO!!!</p>
+  </div>
+  <!-- direction hint -->
+  <div class="absolute top-[172px] md:top-[140px] left-1/2 -translate-x-1/2 z-10 pointer-events-none hidden md:flex glass rounded-full border border-white/10 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-white/60">▲ FORWARD &nbsp;•&nbsp; HOLD <span class="text-white">W / GAS</span> &nbsp;•&nbsp; A/D = STEER (Right is Right)</div>
+</div>
+
+<div id="overlay" class="absolute inset-0 z-30 hidden place-items-center bg-[#050507]/60 backdrop-blur-[6px] p-4">
+  <div class="w-full max-w-[420px] glass rounded-[28px] border border-white/10 overflow-hidden p-8 text-center">
+    <p class="text-cyan-400 font-black tracking-[0.2em] text-xs">PAUSED</p>
+    <h2 class="display font-black text-3xl mt-2">TAKE A BREATH</h2>
+    <button id="playBtn" class="mt-6 w-full h-[54px] rounded-full bg-white text-black font-black flex items-center justify-center gap-2">▶ RESUME</button>
+    <p class="text-white/40 text-xs mt-3">A / D or ← / → to steer • W to drive • SHIFT for Nitro 450</p>
+  </div>
+</div>
+
+<div id="gameOver" class="absolute inset-0 z-40 hidden place-items-center bg-[#050507]/75 backdrop-blur-[10px] p-4">
+  <div class="w-full max-w-[480px] glass rounded-[28px] border border-white/10 overflow-hidden text-center">
+    <div class="h-36 relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-red-600 via-orange-600 to-red-800">
+      <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(45deg, transparent 0 12px, rgba(255,255,255,0.12) 12px 13px)"></div>
+      <div class="relative">
+        <p class="text-5xl">💥</p>
+        <h2 class="display font-black text-3xl tracking-tight mt-2">CRASHED!</h2>
+        <p class="text-white/90 text-xs tracking-[0.18em] font-bold mt-1">YOU HIT TRAFFIC</p>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-white/[0.06] border border-white/10 p-4">
+          <p class="text-[10px] tracking-[0.15em] text-white/40 font-bold">DISTANCE</p>
+          <p class="display font-black text-xl mt-1"><span id="finalDist">0.00</span> <span class="text-xs text-white/50">km</span></p>
+        </div>
+        <div class="rounded-2xl bg-white/[0.06] border border-white/10 p-4">
+          <p class="text-[10px] tracking-[0.15em] text-white/40 font-bold">SPEED</p>
+          <p class="display font-black text-xl mt-1"><span id="finalSpeed">0</span> <span class="text-xs text-white/50">km/h</span></p>
+        </div>
+      </div>
+      <button id="retryBtn" class="mt-5 w-full h-[54px] rounded-full bg-white text-black font-black tracking-wide flex items-center justify-center gap-2">↻ RETRY</button>
+      <p class="text-white/30 text-[11px] mt-3">Tip: Tap Nitro to blast to 450 past trucks!</p>
+    </div>
+  </div>
+</div>
+
+<div class="absolute bottom-0 inset-x-0 z-20 p-3 pb-[max(12px,env(safe-area-inset-bottom))] md:hidden">
+  <div class="flex gap-2.5 items-end">
+    <div class="flex gap-2">
+      <button id="leftBtn" class="w-[64px] h-[64px] rounded-[20px] glass border border-white/15 active:bg-white active:text-black transition grid place-items-center text-2xl select-none">‹</button>
+      <button id="rightBtn" class="w-[64px] h-[64px] rounded-[20px] glass border border-white/15 active:bg-white active:text-black transition grid place-items-center text-2xl select-none">›</button>
+    </div>
+    <div class="flex-1 flex gap-2">
+      <button id="brakeBtn" class="flex-1 h-[64px] rounded-[20px] glass border border-white/15 active:bg-white/90 transition grid place-items-center">
+        <span class="w-8 h-8 rounded-full border-2 border-white/60 grid place-items-center text-white/80 text-xs">▼</span>
+      </button>
+      <button id="gasBtn" class="flex-1 h-[64px] rounded-[20px] bg-[#ff3b30] active:bg-[#ff4a40] transition grid place-items-center shadow-[0_10px_30px_rgba(255,59,48,0.5)]">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+    <button id="nitroBtn" class="w-[74px] h-[64px] rounded-[20px] bg-gradient-to-b from-cyan-400 to-blue-600 border border-white/20 active:from-cyan-300 active:to-blue-500 transition grid place-items-center shadow-[0_10px_30px_rgba(0,140,255,0.55)] shrink-0">
+      <div class="text-center leading-none"><div class="text-[18px]">⚡</div><div class="text-[9px] font-black tracking-[0.14em] text-white">NITRO</div></div>
+    </button>
+  </div>
+  <div class="flex justify-between items-center mt-2 px-1">
+    <p class="text-[10px] tracking-[0.14em] text-white/35 font-bold">◀ LEFT &nbsp; RIGHT ▶ &nbsp; • &nbsp; HOLD GAS TO GO FORWARD</p>
+    <button id="mobileRestart" class="text-[11px] font-bold tracking-wide text-white/70">RESTART ↻</button>
+  </div>
+</div>
+
+<div class="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 z-10 items-center gap-2 glass border border-white/10 rounded-full px-4 py-2 text-[11px] font-semibold tracking-wide text-white/70">
+  W = Gas (Forward) • S = Brake • A / D = Steer — Right is Right • SHIFT = Nitro 450 km/h
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+const canvas = document.getElementById('c');
+const wrap = document.getElementById('wrap');
+const speedEl = document.getElementById('speedEl');
+const distEl = document.getElementById('distEl');
+const overlay = document.getElementById('overlay');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const gasBtn = document.getElementById('gasBtn');
+const brakeBtn = document.getElementById('brakeBtn');
+const changeCar = document.getElementById('changeCar');
+const restartTop = document.getElementById('restartTop');
+const mobileRestart = document.getElementById('mobileRestart');
+const nitroBtn = document.getElementById('nitroBtn');
+const nitroBtnDesk = document.getElementById('nitroBtnDesk');
+const nitroFill = document.getElementById('nitroFill');
+const nitroFillMobile = document.getElementById('nitroFillMobile');
+const nitroPercent = document.getElementById('nitroPercent');
+const nitroState = document.getElementById('nitroState');
+const nitroFx = document.getElementById('nitroFx');
+const speedLines = document.getElementById('speedLines');
+const nitroText = document.getElementById('nitroText');
+const gameOverEl = document.getElementById('gameOver');
+const retryBtn = document.getElementById('retryBtn');
+const finalDist = document.getElementById('finalDist');
+const finalSpeed = document.getElementById('finalSpeed');
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog('#0a0a0f', 45, 190);
+scene.background = new THREE.Color('#0d0d14');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+renderer.shadowMap.enabled = true;
+const camera = new THREE.PerspectiveCamera(68, wrap.clientWidth / wrap.clientHeight, 0.1, 500);
+camera.position.set(0, 5.8, -14);
+camera.lookAt(0,0,30);
+window.addEventListener('resize', ()=>{
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  camera.aspect = wrap.clientWidth / wrap.clientHeight;
+  camera.updateProjectionMatrix();
+});
+scene.add(new THREE.HemisphereLight(0xffcfb0, 0x1a1a2a, 1.1));
+const sun = new THREE.DirectionalLight(0xff8a5c, 2.2); sun.position.set(40,60,30); sun.castShadow=true; scene.add(sun);
+scene.add(new THREE.DirectionalLight(0x7aa8ff,0.6).position.set(-30,20,-20));
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(800,800), new THREE.MeshStandardMaterial({color:0x1b1b22}));
+ground.rotation.x=-Math.PI/2; ground.position.y=-0.02; scene.add(ground);
+const roadW=16;
+const road = new THREE.Mesh(new THREE.PlaneGeometry(roadW,2000), new THREE.MeshStandardMaterial({color:0x24242c}));
+road.rotation.x=-Math.PI/2; road.position.y=0.02; scene.add(road);
+[-roadW/2-0.45, roadW/2+0.45].forEach(x=>{
+  const m=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.18,2000), new THREE.MeshStandardMaterial({color:0x2a2a33}));
+  m.position.set(x,0.12,0); scene.add(m);
+});
+const dashGroup=new THREE.Group(); scene.add(dashGroup);
+const dashMat=new THREE.MeshStandardMaterial({color:0xf5f5f0, emissive:0xffffff, emissiveIntensity:0.18});
+for(let i=-1000;i<1000;i+=8){
+  const dash=new THREE.Mesh(new THREE.PlaneGeometry(0.35,4.5), dashMat);
+  dash.rotation.x=-Math.PI/2; dash.position.set(0,0.04,i); dashGroup.add(dash);
+  if(i%16===0){
+    const d2=dash.clone(); d2.position.x=-roadW/3; d2.scale.x=0.6; dashGroup.add(d2);
+    const d3=d2.clone(); d3.position.x=roadW/3; dashGroup.add(d3);
+  }
+}
+
+function createCar(color='#ff3b30'){
+  const g=new THREE.Group();
+  const bodyMat=new THREE.MeshStandardMaterial({color, roughness:0.35, metalness:0.25});
+  const glassMat=new THREE.MeshStandardMaterial({color:0x0a1a2a, roughness:0.1, metalness:0.6});
+  const base=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.55,4.2), bodyMat); base.position.y=0.55; base.castShadow=true; g.add(base);
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.55,0.5,1.9), glassMat); cabin.position.set(0,0.98,-0.25); g.add(cabin);
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.08,1.7), bodyMat); roof.position.set(0,1.27,-0.25); g.add(roof);
+  const nose=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.35,0.6), bodyMat); nose.position.set(0,0.55,2.15); g.add(nose);
+  const lightMat=new THREE.MeshStandardMaterial({color:0xffffff, emissive:0xffffff, emissiveIntensity:1.6});
+  const hl1=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.18,0.08), lightMat); hl1.position.set(-0.7,0.6,2.45); g.add(hl1);
+  const hl2=hl1.clone(); hl2.position.x=0.7; g.add(hl2);
+  const tailMat=new THREE.MeshStandardMaterial({color:0xff1a1a, emissive:0xff1a1a, emissiveIntensity:1.2});
+  const tl1=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.18,0.08), tailMat); tl1.position.set(-0.7,0.62,-2.1); g.add(tl1);
+  const tl2=tl1.clone(); tl2.position.x=0.7; g.add(tl2);
+  const wheelGeo=new THREE.CylinderGeometry(0.38,0.38,0.45,16); const wheelMat=new THREE.MeshStandardMaterial({color:0x111111});
+  [[-1.05,0.22,1.15],[1.05,0.22,1.15],[-1.05,0.22,-1.15],[1.05,0.22,-1.15]].forEach(p=>{
+    const w=new THREE.Mesh(wheelGeo,wheelMat); w.rotation.z=Math.PI/2; w.position.set(...p); g.add(w);
+  });
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(1.9,20), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.28}));
+  shadow.rotation.x=-Math.PI/2; shadow.position.y=0.03; g.add(shadow);
+  const flameMat=new THREE.MeshBasicMaterial({color:0x00d4ff, transparent:true, opacity:0});
+  const coneGeo=new THREE.ConeGeometry(0.22,1.6,8); coneGeo.rotateX(Math.PI/2);
+  const flameL=new THREE.Mesh(coneGeo, flameMat); flameL.position.set(-0.55,0.45,-2.45); flameL.name='flameL'; g.add(flameL);
+  const flameR=new THREE.Mesh(coneGeo, flameMat.clone()); flameR.position.set(0.55,0.45,-2.45); flameR.name='flameR'; g.add(flameR);
+  g.position.set(0,0,-6);
+  return g;
+}
+let carColors=['#ff3b30','#2ec5ff','#ffd60a','#7cff6b','#a78bfa','#ff8bd1']; let colorIdx=0;
+let car=createCar(carColors[0]); scene.add(car);
+
+const trafficGroup=new THREE.Group(); scene.add(trafficGroup);
+const trafficVehicles=[]; let spawnTimer=0.8; let gameOver=false;
+
+function buildVehicleMesh(type){
+  const g=new THREE.Group();
+  if(type==='bike'){
+    const cols=['#ff3b30','#2ec5ff','#ffd60a','#00e6a0']; const col=cols[Math.floor(Math.random()*cols.length)];
+    const mat=new THREE.MeshStandardMaterial({color:col});
+    const body=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.28,1.55), mat); body.position.y=0.48; body.castShadow=true; g.add(body);
+    const rider=new THREE.Mesh(new THREE.CapsuleGeometry(0.24,0.42,4,8), new THREE.MeshStandardMaterial({color:0x151515})); rider.position.set(0,0.78,-0.1); g.add(rider);
+    const helm=new THREE.Mesh(new THREE.SphereGeometry(0.23,10,10), new THREE.MeshStandardMaterial({color:0xf5f5f5})); helm.position.set(0,1.07,-0.12); g.add(helm);
+    const wGeo=new THREE.CylinderGeometry(0.30,0.30,0.18,14); const wMat=new THREE.MeshStandardMaterial({color:0x0a0a0a});
+    const w1=new THREE.Mesh(wGeo,wMat); w1.rotation.z=Math.PI/2; w1.position.set(0,0.20,0.62); g.add(w1); const w2=w1.clone(); w2.position.z=-0.62; g.add(w2);
+  } else if(type==='truck'){
+    const cab=new THREE.Mesh(new THREE.BoxGeometry(2.0,1.05,1.45), new THREE.MeshStandardMaterial({color:0xe8e8ef})); cab.position.set(0,0.72,0.95); g.add(cab);
+    const cargo=new THREE.Mesh(new THREE.BoxGeometry(2.05,1.35,2.9), new THREE.MeshStandardMaterial({color:0x3d4350})); cargo.position.set(0,0.86,-1.25); g.add(cargo);
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.06,0.18,2.9), new THREE.MeshStandardMaterial({color:0xff3b30})); stripe.position.set(0,1.15,-1.25); g.add(stripe);
+  } else {
+    const cols=['#2eafff','#ffcc00','#ffffff','#ff6b6b','#a78bfa','#7cff6b']; const col=cols[Math.floor(Math.random()*cols.length)];
+    const mat=new THREE.MeshStandardMaterial({color:col});
+    const base=new THREE.Mesh(new THREE.BoxGeometry(1.92,0.52,3.35), mat); base.position.y=0.52; base.castShadow=true; g.add(base);
+    const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.48,0.44,1.55), new THREE.MeshStandardMaterial({color:0x0f1f33})); cabin.position.set(0,0.90,-0.18); g.add(cabin);
+  }
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(1.45,12), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.22}));
+  shadow.rotation.x=-Math.PI/2; shadow.position.y=0.02; g.add(shadow);
+  return g;
+}
+function spawnVehicle(){
+  const lanes=[-5.2, 0, 5.2]; let lane=lanes[Math.floor(Math.random()*lanes.length)];
+  let x = lane + (Math.random()-0.5)*0.5;
+  const z= 85 + Math.random()*220;
+  const r=Math.random(); let type='car'; if(r<0.28) type='bike'; else if(r<0.78) type='car'; else type='truck';
+  const mesh=buildVehicleMesh(type); 
+  // CAMERA FIX: camera at -Z looking +Z mirrors X, so invert visual lane to world X
+  mesh.position.set(-x,0,z); 
+  mesh.userData.type=type;
+  mesh.userData.baseKmh= type==='bike'? 85 : type==='truck'? 65 : 75;
+  mesh.userData.laneWorldX = -x;
+  trafficGroup.add(mesh); trafficVehicles.push(mesh);
+}
+for(let i=0;i<6;i++){ spawnVehicle(); trafficVehicles[i].position.z = 40 + i*28 + Math.random()*10; }
+
+function triggerGameOver(){
+  if(gameOver) return; gameOver=true; running=false;
+  finalDist.textContent=distEl.textContent; finalSpeed.textContent=speedEl.textContent;
+  gameOverEl.classList.remove('hidden'); gameOverEl.classList.add('grid');
+  wrap.animate([{transform:'translateX(0)'},{transform:'translateX(8px)'},{transform:'translateX(-8px)'},{transform:'translateX(0)'}],{duration:320});
+}
+function resetGame(){
+  trafficVehicles.forEach(v=> trafficGroup.remove(v)); trafficVehicles.length=0;
+  for(let i=0;i<6;i++){ spawnVehicle(); trafficVehicles[i].position.z = 40 + i*28 + Math.random()*10; }
+  spawnTimer=0.9; gameOver=false; distance=0; kmh=0; visualX=0; steer=0; targetSteer=0; nitro=100;
+  car.position.set(0,0,-6); car.rotation.set(0,0,0);
+  camera.position.set(0,5.8,-14);
+  gameOverEl.classList.add('hidden'); gameOverEl.classList.remove('grid');
+  overlay.classList.add('hidden'); overlay.classList.remove('grid');
+  running=true; paused=false; if(pauseBtn) pauseBtn.textContent='II PAUSE';
+}
+
+let running=true; let paused=false;
+let kmh=0; let distance=0; let nitro=100; let nitroActive=false;
+// visualX is SCREEN-CORRECT: + = right side of screen
+let visualX=0; let steer=0; let targetSteer=0;
+
+const keys={};
+window.addEventListener('keydown', e=>{
+  const k=e.key.toLowerCase(); keys[k]=true; if(e.code==='ShiftLeft'||e.code==='ShiftRight') keys['shift']=true;
+  if(k==='p') togglePause();
+});
+window.addEventListener('keyup', e=>{
+  const k=e.key.toLowerCase(); keys[k]=false; if(e.code==='ShiftLeft'||e.code==='ShiftRight') keys['shift']=false;
+});
+function bindHold(el,onDown,onUp){
+  if(!el) return;
+  const down=(e)=>{e.preventDefault(); onDown();}; const up=(e)=>{e.preventDefault(); onUp();};
+  el.addEventListener('touchstart',down,{passive:false}); el.addEventListener('touchend',up,{passive:false});
+  el.addEventListener('touchcancel',up,{passive:false}); el.addEventListener('mousedown',down); window.addEventListener('mouseup',up);
+}
+bindHold(gasBtn, ()=>keys['w']=true, ()=>keys['w']=false);
+bindHold(brakeBtn, ()=>keys['s']=true, ()=>keys['s']=false);
+bindHold(leftBtn, ()=>keys['a']=true, ()=>keys['a']=false);
+bindHold(rightBtn, ()=>keys['d']=true, ()=>keys['d']=false);
+bindHold(nitroBtn, ()=>keys['shift']=true, ()=>keys['shift']=false);
+bindHold(nitroBtnDesk, ()=>keys['shift']=true, ()=>keys['shift']=false);
+
+changeCar?.addEventListener('click', ()=>{
+  colorIdx=(colorIdx+1)%carColors.length;
+  const keepX=car.position.x; const keepZ=car.position.z; scene.remove(car); car=createCar(carColors[colorIdx]); scene.add(car); car.position.set(keepX,0,keepZ);
+});
+function togglePause(){
+  if(gameOver) return;
+  paused=!paused;
+  if(paused){ overlay.classList.remove('hidden'); overlay.classList.add('grid'); if(pauseBtn) pauseBtn.textContent='▶ RESUME'; }
+  else { overlay.classList.add('hidden'); overlay.classList.remove('grid'); if(pauseBtn) pauseBtn.textContent='II PAUSE'; }
+}
+pauseBtn?.addEventListener('click', togglePause);
+playBtn?.addEventListener('click', togglePause);
+restartTop?.addEventListener('click', resetGame);
+mobileRestart?.addEventListener('click', resetGame);
+retryBtn?.addEventListener('click', resetGame);
+
+let last=performance.now();
+function animate(now){
+  requestAnimationFrame(animate);
+  const dt=Math.min(0.033,(now-last)/1000); last=now;
+
+  const gas=keys['w']||keys['arrowup'];
+  const brake=keys['s']||keys['arrowdown'];
+  const left=keys['a']||keys['arrowleft'];
+  const right=keys['d']||keys['arrowright'];
+  const wantNitro=keys['shift'];
+
+  // === STEERING FIX: Right = visual right ===
+  // raw = +1 for Right, -1 for Left  (screen-correct)
+  const rawSteer=(right?1:0)-(left?1:0);
+  targetSteer=rawSteer;
+  steer += (targetSteer - steer)* 14 * dt;
+
+  // Nitro - TOP 450
+  const canBoost= wantNitro && nitro>1 && running && !paused && !gameOver;
+  nitroActive=canBoost;
+  if(nitroActive){ nitro-=30*dt; if(nitro<0) nitro=0; } else { nitro+= (gas?14:22)*dt; if(nitro>100) nitro=100; }
+  if(nitroFill) nitroFill.style.width=nitro.toFixed(1)+'%';
+  if(nitroFillMobile) nitroFillMobile.style.width=nitro.toFixed(1)+'%';
+  if(nitroPercent) nitroPercent.textContent=Math.round(nitro)+'%';
+  if(nitroState){ nitroState.textContent= nitroActive?'BOOST 450!': nitro<12?'LOW':'READY'; nitroState.className= nitroActive?'text-white font-black animate-pulse':'text-cyan-400'; }
+  if(nitroFx) nitroFx.style.opacity= nitroActive?'1':'0';
+  if(speedLines) speedLines.style.opacity= nitroActive?'1':'0';
+  if(nitroText) { nitroText.style.opacity= nitroActive?'1':'0'; nitroText.style.transform= nitroActive?'translate(-50%,-50%) scale(1)':'translate(-50%,-50%) scale(0.9)'; }
+  const flames=[car.getObjectByName('flameL'),car.getObjectByName('flameR')];
+  flames.forEach(f=>{ if(f){ f.material.opacity= nitroActive? 0.95:0; f.scale.set(1+Math.sin(now*0.02)*0.14,1,1);} });
+
+  if(!running || paused || gameOver){
+    renderer.render(scene,camera);
+    return;
+  }
+
+  // === ACCELERATION FIX: Gas = FORWARD ( +Z is forward) ===
+  const TOP_NITRO = 450;
+  const TOP_NORMAL = 380;
+  const maxSpeed = nitroActive? TOP_NITRO : TOP_NORMAL;
+  let targetSpeed;
+  if(gas && !brake) targetSpeed = maxSpeed;
+  else if(brake) targetSpeed = -30;
+  else targetSpeed = 0;
+
+  if(kmh < targetSpeed) kmh += (nitroActive? 185 : gas? 145 : 70) * dt;
+  else if(kmh > targetSpeed) kmh -= (brake? 220 : 85) * dt;
+
+  if(!gas && !brake && !nitroActive && Math.abs(kmh) < 0.8) kmh=0;
+  if(kmh < -35) kmh=-35;
+  if(kmh > 450) kmh=450;
+
+  // Steering movement: visualX is screen-right positive -> world X is inverted due to camera looking +Z (180deg)
+  const steerSpeed = 13.5 * (0.55 + Math.abs(kmh)/180);
+  visualX += steer * steerSpeed * dt;
+  visualX = Math.max(-7.0, Math.min(7.0, visualX));
+  car.position.x = -visualX; // INVERT to match screen: visual right = world left
+  car.rotation.z = steer * 0.42; // lean into turn visually correct
+  car.rotation.y = steer * 0.18;
+  car.position.y = Math.sin(now*0.012)*0.012 * (Math.abs(kmh)/80);
+
+  // WORLD SCROLL: forward = dashes move TOWARDS camera (-Z) when kmh>0
+  const worldMove = kmh * dt * 0.085;
+  dashGroup.children.forEach(d=>{
+    d.position.z -= worldMove;
+    if(d.position.z < -1000) d.position.z += 2000;
+    if(d.position.z > 1000) d.position.z -= 2000;
+  });
+
+  // TRAFFIC - all going FORWARD (+Z) but slower, so you overtake them
+  spawnTimer -= dt;
+  if(spawnTimer<=0){
+    spawnVehicle();
+    spawnTimer = 0.55 + Math.random()*0.7 - Math.min(0.35, Math.abs(kmh)/900);
+    if(Math.random()<0.30) spawnTimer*=0.55;
+  }
+  for(let i=trafficVehicles.length-1;i>=0;i--){
+    const v=trafficVehicles[i];
+    const rel = kmh - v.userData.baseKmh;
+    v.position.z -= rel * dt * 0.085; // if you are faster, traffic comes towards you (-Z)
+    // slight sway
+    v.position.x = v.userData.laneWorldX + Math.sin(now*0.001 + i)*0.06;
+    if(v.position.z < -32){
+      trafficGroup.remove(v); trafficVehicles.splice(i,1); continue;
+    }
+    if(v.position.z > 380){
+      trafficGroup.remove(v); trafficVehicles.splice(i,1); continue;
+    }
+    // Collision - use world X (both inverted)
+    const dx = Math.abs(v.position.x - car.position.x);
+    const dz = Math.abs(v.position.z - (-6));
+    const w = v.userData.type==='bike'?1.05 : v.userData.type==='truck'?1.95 : 1.65;
+    const l = v.userData.type==='bike'?1.25 : v.userData.type==='truck'?2.8 : 2.0;
+    if(dz < l && dx < w){
+      triggerGameOver();
+    }
+  }
+
+  if(kmh>0) distance += kmh * dt * 0.000277777;
+  speedEl.textContent=Math.round(Math.max(0,kmh)).toString();
+  distEl.textContent=distance.toFixed(2);
+
+  // === CHASE CAM: tracks your car X smoothly ===
+  const targetCamX = car.position.x * 0.38;
+  camera.position.x += (targetCamX - camera.position.x) * 4 * dt;
+  camera.position.y += (5.8 - camera.position.y) * 2 * dt;
+  camera.lookAt(visualX * 0.34, 0.2, 22);
+
+  renderer.render(scene,camera);
+}
+animate(performance.now());
+</script>
+</body>
+</html>
